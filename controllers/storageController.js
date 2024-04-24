@@ -1,24 +1,40 @@
 const User = require("../models/User");
 const { generateUploadSignedUrl, deleteImage } = require("../utils/imgs");
 // Controller method for updating profile picture
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const generateSignedUrl = async (req, res, next) => {
   const type = req.query.type; // 'profile' or 'post'
+  const orgnialName = req.query.fileName;
   const isTemporary = req.query.isTemporary === "true"; // Check if 'isTemporary' query parameter is true
-  const validTypes = ["profile", "post"];
+  const validTypes = ["profile", "post", "chat", "file"];
 
   if (!validTypes.includes(type)) {
     return res.status(400).json({ message: "Invalid type parameter" });
   }
 
   // Determine the prefix based on 'type' and 'isTemporary'
-  let prefix = type === "profile" ? "profile-pictures" : "post-images";
+  let prefix =
+    type === "profile"
+      ? "profile-pictures"
+      : type === "post"
+      ? "post-images"
+      : type === "file"
+      ? "files"
+      : "chat-images";
   if (isTemporary) {
     prefix = `temporary/${prefix}`; // Prepend 'temporary/' if 'isTemporary' is true
   }
 
-  const filename = `${prefix}/${req.user.id}-${Date.now()}`;
+  const filename =
+    type === "file"
+      ? `${prefix}/${orgnialName}`
+      : `${prefix}/${req.user.id}-${Date.now()}`;
 
   try {
+    // await sleep(20000); // Wait for 20 seconds
     // Generate the signed URL for uploading.
     const signedUrl = await generateUploadSignedUrl(filename);
     const bucketName = process.env.GCS_BUCKET_NAME;

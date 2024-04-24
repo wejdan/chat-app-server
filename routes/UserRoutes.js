@@ -9,6 +9,7 @@ const {
   deleteUser,
   updateProfile,
   getAllUsers,
+  searchUsers,
 } = require("../controllers/userControllers");
 
 const router = express.Router();
@@ -20,6 +21,8 @@ const upload = multer({
 });
 // Place the specific route before the general one
 router.get("/", checkAuth, restrictTo("admin"), getAllUsers);
+router.get("/search", searchUsers);
+
 router.delete("/:userId", checkAuth, restrictTo("admin"), deleteUser);
 
 router.patch("/:userId", checkAuth, updateUser);

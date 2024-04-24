@@ -193,7 +193,17 @@ const loginUser = async (req, res, next) => {
     await existingUser.save();
     const userObj = existingUser.toObject({ getters: true });
     delete userObj.password;
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true, // The cookie is not accessible via JavaScript
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      maxAge: 3600000, // Cookie expiry set to 1 hour
+    });
 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiry set to 7 days
+    });
     res.json({ accessToken, refreshToken, user: userObj });
   } catch (error) {
     next(error);

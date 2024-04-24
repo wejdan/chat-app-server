@@ -97,6 +97,27 @@ const updateProfile = async (req, res, next) => {
   }
 };
 // Controller method to get all users
+const searchUsers = async (req, res) => {
+  const searchQuery = req.query.query;
+
+  try {
+    // Use a case-insensitive regex search to find actors matching the search query in their name
+    const results = await User.find({
+      name: { $regex: searchQuery, $options: "i" },
+    }).limit(10); // Limit the results to 10 or any number you see fit
+
+    // Transform the results to match the expected format for React Select
+    const users = results.map((user) => ({
+      value: user._id.toString(),
+      label: user.name,
+      image: user.profileImg, // Assuming 'profile' is the field for the actor's image URL
+    }));
+
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find().select("-password -refreshToken"); // Excluding sensitive fields
@@ -115,4 +136,5 @@ module.exports = {
   getAllUsers,
   updateUser,
   updateProfile,
+  searchUsers,
 };

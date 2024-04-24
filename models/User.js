@@ -65,6 +65,7 @@ const userSchema = new Schema({
     select: false,
   },
   updatedAt: Date,
+  lastSeen: Date,
 });
 userSchema.statics.findOrCreate = async function findOrCreate(condition, doc) {
   try {
